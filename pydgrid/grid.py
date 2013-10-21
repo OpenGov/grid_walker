@@ -387,6 +387,35 @@ class Grid(collections.MutableMapping):
                 fullkey = self.griditer.next()
                 return (fullkey, self.grid[fullkey])
         return GridItemIter(self)
+
+    def arg_max(self, grid_val_func=lambda k,v: v):
+        '''
+        Allows for argument maximization across all dimensions of the data.
+
+        Args:
+            grid_val_func: The evaluator for a given cell of the grid.
+                Evaluators should take the key tuple and value pair and
+                return a number which scores the given cell.
+        '''
+        max_arg = None
+        max_score = -sys.maxint
+        for key,val in self.full_iter_items():
+            check = grid_val_func(key, val)
+            if (check > max_score):
+                max_score = check
+                max_arg = key
+        return max_arg
+
+    def arg_min(self, grid_val_func=lambda k,v: v):
+        '''
+        Allows for argument minimization across all dimensions of the data.
+
+        Args:
+            grid_val_func: The evaluator for a given cell of the grid.
+                Evaluators should take the key tuple and value pair and
+                return a number which scores the given cell.
+        '''
+        return self.arg_max(lambda k,v: -grid_val_func(k,v))
     
     def __str__(self):
         '''
@@ -497,4 +526,3 @@ class ObjectGrid(Grid):
         Grid.__init__(self, object, *dimensions)
 
 # TODO add dimension mappers as optional argument to allow floating or string indexes
-# TODO add function maximizer iterator

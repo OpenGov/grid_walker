@@ -36,7 +36,7 @@ class TableWrapTest(unittest.TestCase):
         self.basic_grid_asserts(test_grid, tuple_indexes, values, zip(tuple_indexes, values))
 
     def test_multi_dim_int_grid(self):
-        test_grid = grid.IntGrid((0, 10), (-20, 20, 2), (0,1))
+        test_grid = grid.IntGrid((0, 10), (-20, 20, 2), (0, 1))
         full_items_check = {}
         
         for index_1, check_index_1 in zip(test_grid, range(11)):
@@ -90,7 +90,7 @@ class TableWrapTest(unittest.TestCase):
         self.basic_grid_asserts(test_grid, tuple_indexes, values, zip(tuple_indexes, values))
 
     def test_multi_dim_str_grid(self):
-        test_grid = grid.ObjectGrid((0, 10), (-20, 20, 2), (0,1))
+        test_grid = grid.ObjectGrid((0, 10), (-20, 20, 2), (0, 1))
         full_items_check = {}
         
         for index_1, check_index_1 in zip(test_grid, range(11)):
@@ -103,6 +103,17 @@ class TableWrapTest(unittest.TestCase):
                     full_items_check[(index_1, index_2, index_3)] = 'i='+str(index_1*index_2*index_3)
 
         self.dict_grid_asserts(test_grid, full_items_check)
+
+    def test_arg_min_max(self):
+        test_grid = grid.FloatGrid((0, 10), (-10, 5))
+        for index1, index2 in test_grid.full_iter():
+            test_grid[index1][index2] = abs(index1) + abs(index2)
+
+        self.assertEqual((0, 0), test_grid.arg_min())
+        self.assertEqual((10, -10), test_grid.arg_min(lambda k,v: k[0] * k[1] + v))
+
+        self.assertEqual((10, -10), test_grid.arg_max())
+        self.assertEqual((10, 5), test_grid.arg_max(lambda k,v: k[0] * k[1] + v))
 
     # TODO test slices/all combinations of getters/setters
 

@@ -1,5 +1,5 @@
 import collections
-import numpy
+import numpy as np
 import sys
 from datawrap import listwrap
 
@@ -29,7 +29,7 @@ class Grid(collections.MutableMapping):
                 (dim_param.last + dim_param.step - dim_param.first) / dim_param.step)
             
         # Define our grid now as a numpy array
-        self.grid = numpy.zeros(self.dim_lengths, dtype=grid_type)
+        self.grid = np.zeros(self.dim_lengths, dtype=grid_type)
         
     def _convert_dim_to_param(self, dim, default_params=DimensionParam(None,None,1)):
         '''
@@ -475,18 +475,26 @@ class SubGrid(Grid):
                 raise ValueError("Could not combine restrictions")
         return combined_params
                 
-'''
-Defines a grid with floating values at each dimension
-point.
-'''
 class FloatGrid(Grid):
+    '''
+    Defines a grid with floating values at each dimension point.
+    '''
     def __init__(self, *dimensions):
-        Grid.__init__(self, numpy.float, *dimensions)
-        
-'''
-Defines a grid with integer values at each dimension
-point.
-'''
+        Grid.__init__(self, np.float, *dimensions)
+
 class IntGrid(Grid):
+    '''
+    Defines a grid with integer values at each dimension point.
+    '''
     def __init__(self, *dimensions):
-        Grid.__init__(self, numpy.int, *dimensions)
+        Grid.__init__(self, np.int, *dimensions)
+
+class ObjectGrid(Grid):
+    '''
+    Defines a grid with arbitrary object values at each dimension point.
+    '''
+    def __init__(self, *dimensions):
+        Grid.__init__(self, object, *dimensions)
+
+# TODO add dimension mappers as optional argument to allow floating or string indexes
+# TODO add function maximizer iterator

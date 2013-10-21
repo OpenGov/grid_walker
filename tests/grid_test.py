@@ -5,11 +5,8 @@ import unittest
 
 class TableWrapTest(unittest.TestCase):
     '''
-    Tests the capability to wrap 2D objects in Tables and transpose them.
+    Tests the creation and iteration of grid objects
     '''
-    def setUp(self):
-        pass
-
     def basic_grid_asserts(self, test_grid, keys, values, items):
         self.assertListEqual(keys, list(test_grid.full_iter()))
         self.assertListEqual(keys, list(test_grid.full_iter_keys()))
@@ -46,7 +43,7 @@ class TableWrapTest(unittest.TestCase):
             self.assertEqual(index_1, check_index_1)
             for index_2, check_index_2 in zip(test_grid[index_1], range(-20, 22, 2)):
                 self.assertEqual(index_2, check_index_2)
-                for index_3, check_index_3 in zip(test_grid[index_1][index_2], [0,1]):
+                for index_3, check_index_3 in zip(test_grid[index_1][index_2], [0, 1]):
                     self.assertEqual(index_3, check_index_3)
                     test_grid[index_1][index_2][index_3] = index_1*index_2*index_3
                     full_items_check[(index_1, index_2, index_3)] = index_1*index_2*index_3
@@ -66,19 +63,48 @@ class TableWrapTest(unittest.TestCase):
         self.basic_grid_asserts(test_grid, tuple_indexes, values, zip(tuple_indexes, values))
 
     def test_multi_dim_int_grid(self):
-        test_grid = grid.FloatGrid((0, 10), (-20, 20, 2), (0,1))
+        test_grid = grid.FloatGrid((-1, 10), (-20, 20, 3), (0, 0))
+        full_items_check = {}
+        
+        for index_1, check_index_1 in zip(test_grid, range(-1, 11)):
+            self.assertEqual(index_1, check_index_1)
+            for index_2, check_index_2 in zip(test_grid[index_1], range(-20, 21, 3)):
+                self.assertEqual(index_2, check_index_2)
+                for index_3, check_index_3 in zip(test_grid[index_1][index_2], [0]):
+                    self.assertEqual(index_3, check_index_3)
+                    test_grid[index_1][index_2][index_3] = index_1*index_2*index_3 - 0.3
+                    full_items_check[(index_1, index_2, index_3)] = index_1*index_2*index_3 - 0.3
+
+        self.dict_grid_asserts(test_grid, full_items_check)
+
+    def test_basic_obj_grid(self):
+        test_grid = grid.ObjectGrid((0, 10))
+        self.assertListEqual(range(11), list(test_grid))
+
+        for index in test_grid:
+            test_grid[index] = 'neg_i='+str(-index) if index % 2 else index
+        
+        tuple_indexes = map(lambda x: (x,), list(range(11)))
+        values = map(lambda index: 'neg_i='+str(-index) if index % 2 else index, range(11))
+
+        self.basic_grid_asserts(test_grid, tuple_indexes, values, zip(tuple_indexes, values))
+
+    def test_multi_dim_str_grid(self):
+        test_grid = grid.ObjectGrid((0, 10), (-20, 20, 2), (0,1))
         full_items_check = {}
         
         for index_1, check_index_1 in zip(test_grid, range(11)):
             self.assertEqual(index_1, check_index_1)
             for index_2, check_index_2 in zip(test_grid[index_1], range(-20, 22, 2)):
                 self.assertEqual(index_2, check_index_2)
-                for index_3, check_index_3 in zip(test_grid[index_1][index_2], [0,1]):
+                for index_3, check_index_3 in zip(test_grid[index_1][index_2], [0, 1]):
                     self.assertEqual(index_3, check_index_3)
-                    test_grid[index_1][index_2][index_3] = index_1*index_2*index_3 - 0.3
-                    full_items_check[(index_1, index_2, index_3)] = index_1*index_2*index_3 - 0.3
+                    test_grid[index_1][index_2][index_3] = 'i='+str(index_1*index_2*index_3)
+                    full_items_check[(index_1, index_2, index_3)] = 'i='+str(index_1*index_2*index_3)
 
         self.dict_grid_asserts(test_grid, full_items_check)
+
+    # TODO test slices/all combinations of getters/setters
 
 if __name__ == '__main__': 
     unittest.main()

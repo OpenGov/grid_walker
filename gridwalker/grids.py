@@ -5,7 +5,7 @@ from datawrap import listwrap
 
 class Grid(collections.MutableMapping):
     DimensionParam = collections.namedtuple('DimensionParam', ['first', 'last', 'step'])
-    
+
     def __init__(self, grid_type, *dimensions):
         '''
         Args:
@@ -20,23 +20,22 @@ class Grid(collections.MutableMapping):
         self.dim_ranges = []
         self.dim_restrictions = []
         self.dim_lengths = []
-            
+
         for dim in dimensions:
             dim_param = self._convert_dim_to_param(dim)
             self.dim_ranges.append(dim_param)
             self.dim_restrictions.append(dim_param)
             self.dim_lengths.append(
                 (dim_param.last + dim_param.step - dim_param.first) / dim_param.step)
-            
+
         # Define our grid now as a numpy array
         self.grid = np.zeros(self.dim_lengths, dtype=grid_type)
-        
+
     def _convert_dim_to_param(self, dim, default_params=DimensionParam(None,None,1)):
         '''
         Converts various dimension specifications into DimensionParam
         named tuple for use elsewhere in Grid
         '''
-        
 
         first = last = step = None
         # Short-Circuit for DimensionParams
@@ -63,7 +62,7 @@ class Grid(collections.MutableMapping):
             step = dim.step
         else:
             first = last = dim
-        
+
         # Ensure that we don't have None values
         if first == None:
             first = default_params.first
@@ -71,18 +70,18 @@ class Grid(collections.MutableMapping):
             last = default_params.last
         if step == None:
             step = default_params.step
-        
+
         # Check for violations
         if (first == None or last == None or step == None or 
             step < 1 or last < first):
             raise self._bad_dim_error(dim)
-        
+
         return self.DimensionParam(first, last, step)
 
     def _bad_dim_error(self, dim):
-        return ValueError("Dimension range '"+str(dim)+
-            "' has an invalid or length range definition")
-    
+        err = "Dimension range '%s' has an invalid or length range definition" % str(dim)
+        return ValueError(err)
+
     def _check_against_limits(self, index, dimension):
         '''
         Checks single dimension restrictions on legal indexes.
@@ -103,7 +102,7 @@ class Grid(collections.MutableMapping):
             if (index < restrictions.first or 
                 index > restrictions.last):
                 raise KeyError(index)
-        
+
     def _convert_to_array_index(self, index, dimension=0, depth=0):
         '''
         Converts index values from true locations to internal
@@ -146,7 +145,7 @@ class Grid(collections.MutableMapping):
         else:
             result = (index - drange.first) / drange.step
         return result
-    
+
     def _get_single_depth(self, multi_index):
         '''
         Helper method for determining how many single index entries 
@@ -158,13 +157,13 @@ class Grid(collections.MutableMapping):
                 break
             single_depth += 1
         return single_depth
-        
+
     def __getitem__(self, index):
         '''
         Getitem is rather complicated to handle the various cases
         of dimensional requests and slicing. All of the following
         are legal request types:
-        
+
         single index: grid[0] => grid_type object 
                                  (or SubGrid if not last dimension)
         compound index: grid[0][1] => grid_type object 
@@ -210,27 +209,27 @@ class Grid(collections.MutableMapping):
         # Specific index for all dimensions
         else:
             return self.grid.__getitem__(rebuilt_index)
-    
+
     def __setitem__(self, index, value):
         '''
         Can set on ranges of values as well individual indices
         '''
         rebuilt_index = self._convert_to_array_index(index)
         self.grid.__setitem__(rebuilt_index, value)
-        
+
     def __delitem__(self, index):
         '''
         Resets the index to 0 ==> same as __setitem__(self, index, 0)
         '''
         self.__setitem__(index, 0)
-    
+
     def __len__(self):
         '''
         Gives the length of the highest dimension
         '''
         restrict = self.dim_restrictions[0]
         return (restrict.last - restrict.first + restrict.step) / restrict.step
-    
+
     def _generate_dim_range(self, dim):
         '''
         Generates a slice of the range for a particular dimension of 
@@ -242,7 +241,7 @@ class Grid(collections.MutableMapping):
         step = restrict.step
         stop = restrict.last+1
         return slice(start, stop, step)
-    
+
     def _generate_mapped_grid_ranges(self):
         '''
         Generates the slice ranges of all valid keys for the grid at 
@@ -252,7 +251,7 @@ class Grid(collections.MutableMapping):
         for dim in xrange(len(self.dim_restrictions)):
             mapped_grid_ranges.append(self._generate_dim_range(dim))
         return mapped_grid_ranges
-    
+
     def _generate_true_grid_ranges(self):
         true_grid_ranges = []
         for dim in xrange(len(self.dim_restrictions)):
@@ -263,15 +262,15 @@ class Grid(collections.MutableMapping):
             stop = self._convert_to_array_index(restrict.last, dim)+step
             true_grid_ranges.append(slice(start, stop, step))
         return true_grid_ranges
-    
+
     def get_raw_data_wrapper(self):
         dim_ranges = self._generate_true_grid_ranges()
         return listwrap.FixedListSubset(self.grid, *dim_ranges)
-    
+
     def __iter__(self):
         dim_slice = self._generate_dim_range(0)
         return xrange(dim_slice.start, dim_slice.stop, dim_slice.step).__iter__()
-    
+
     def full_iter(self):
         '''
         Iterates through the entire grid one cell at a time.
@@ -285,7 +284,7 @@ class Grid(collections.MutableMapping):
                 self.depth = depth
                 self.prior = prior
                 self.next = next_link
-                
+
         class GridIter(object):
             def __init__(self, grid):
                 self.grid = grid
@@ -310,10 +309,10 @@ class Grid(collections.MutableMapping):
                 # the correct value for beginning iteration.
                 if self.cursor != None:
                     self.cursor.next_value = self.cursor.value
-            
+
             def __iter__(self):
                 return self
-            
+
             def next(self):
                 # If our current cursor makes it to a None, we're done
                 if self.cursor == None:
@@ -350,10 +349,10 @@ class Grid(collections.MutableMapping):
                 return self.current_key
             
         return GridIter(self)
-    
+
     def full_iter_keys(self):
         return self.full_iter()
-    
+
     def full_iter_values(self):
         '''
         Like full_iter, but return values instead of keys
@@ -370,7 +369,7 @@ class Grid(collections.MutableMapping):
                 fullkey = self.griditer.next()
                 return self.grid[fullkey]
         return GridValueIter(self)
-         
+
     def full_iter_items(self):
         '''
         Like full_iter, but return key, value pairs instead of just keys
@@ -416,7 +415,7 @@ class Grid(collections.MutableMapping):
                 return a number which scores the given cell.
         '''
         return self.arg_max(lambda k,v: -grid_val_func(k,v))
-    
+
     def __str__(self):
         '''
         This can be expensive for high dimension grids.
@@ -429,7 +428,7 @@ class Grid(collections.MutableMapping):
                                                            mapper.start+(100*mapper.step), 
                                                            mapper.step)]
             return str(mapitems)[:-1] + ", ... ]"
-        
+
     def __repr__(self):
         '''
         This can be expensive for high dimension lists.
@@ -439,7 +438,7 @@ class Grid(collections.MutableMapping):
                                                        mapper.stop, 
                                                        mapper.step)]
         return repr(mapitems)
-    
+
 class SubGrid(Grid):
     '''
     Wraps the Grid object with a constructor which builds a
@@ -452,8 +451,7 @@ class SubGrid(Grid):
         self.dim_lengths = dim_lengths
         self.dim_restrictions = dim_restrictions
         self.grid = grid
-        
-        
+
         # Do this check/assignment After the others
         if add_restrictions:
             if len(add_restrictions) > self.dim_restrictions:
@@ -470,7 +468,7 @@ class SubGrid(Grid):
         for i, restrict in enumerate(restrictions):
             converted.append(self._convert_dim_to_param(restrict, self.dim_restrictions[i]))
         return converted
-        
+
     def _combine_restrictions(self, first_restrictions, second_restrictions):
         '''
         Combines dimensional restrictions from two sources
@@ -494,7 +492,7 @@ class SubGrid(Grid):
                     raise ValueError("Dimension restriction step sizes are not "+
                                      "multiples of each other ("+str(first_param.step)+
                                      ", "+str(second_param.step)+")")
-                
+
                 param = self.DimensionParam(first, last, step)
                 if last < first:
                     raise ValueError("Dimension restriction is NULL set "+str(param))
@@ -503,7 +501,7 @@ class SubGrid(Grid):
                 # This should never be reached
                 raise ValueError("Could not combine restrictions")
         return combined_params
-                
+
 class FloatGrid(Grid):
     '''
     Defines a grid with floating values at each dimension point.

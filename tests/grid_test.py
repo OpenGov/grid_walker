@@ -1,6 +1,7 @@
 # This import fixes sys.path issues
-import bootstrap
-from pydgrid import grid
+import parentpath
+
+from gridwalker import grids
 import unittest
 
 class TableWrapTest(unittest.TestCase):
@@ -24,7 +25,7 @@ class TableWrapTest(unittest.TestCase):
         self.assertListEqual(sorted(checker.iteritems()), sorted(list(test_grid.full_iter_items())))
 
     def test_basic_int_grid(self):
-        test_grid = grid.IntGrid((0, 10))
+        test_grid = grids.IntGrid((0, 10))
         self.assertListEqual(range(11), list(test_grid))
 
         for index in test_grid:
@@ -36,7 +37,7 @@ class TableWrapTest(unittest.TestCase):
         self.basic_grid_asserts(test_grid, tuple_indexes, values, zip(tuple_indexes, values))
 
     def test_multi_dim_int_grid(self):
-        test_grid = grid.IntGrid((0, 10), (-20, 20, 2), (0, 1))
+        test_grid = grids.IntGrid((0, 10), (-20, 20, 2), (0, 1))
         full_items_check = {}
         
         for index_1, check_index_1 in zip(test_grid, range(11)):
@@ -51,7 +52,7 @@ class TableWrapTest(unittest.TestCase):
         self.dict_grid_asserts(test_grid, full_items_check)
 
     def test_basic_float_grid(self):
-        test_grid = grid.FloatGrid((0, 10))
+        test_grid = grids.FloatGrid((0, 10))
         self.assertListEqual(range(11), list(test_grid))
 
         for index in test_grid:
@@ -63,7 +64,7 @@ class TableWrapTest(unittest.TestCase):
         self.basic_grid_asserts(test_grid, tuple_indexes, values, zip(tuple_indexes, values))
 
     def test_multi_dim_int_grid(self):
-        test_grid = grid.FloatGrid((-1, 10), (-20, 20, 3), (0, 0))
+        test_grid = grids.FloatGrid((-1, 10), (-20, 20, 3), (0, 0))
         full_items_check = {}
         
         for index_1, check_index_1 in zip(test_grid, range(-1, 11)):
@@ -78,7 +79,7 @@ class TableWrapTest(unittest.TestCase):
         self.dict_grid_asserts(test_grid, full_items_check)
 
     def test_basic_obj_grid(self):
-        test_grid = grid.ObjectGrid((0, 10))
+        test_grid = grids.ObjectGrid((0, 10))
         self.assertListEqual(range(11), list(test_grid))
 
         for index in test_grid:
@@ -90,7 +91,7 @@ class TableWrapTest(unittest.TestCase):
         self.basic_grid_asserts(test_grid, tuple_indexes, values, zip(tuple_indexes, values))
 
     def test_multi_dim_str_grid(self):
-        test_grid = grid.ObjectGrid((0, 10), (-20, 20, 2), (0, 1))
+        test_grid = grids.ObjectGrid((0, 10), (-20, 20, 2), (0, 1))
         full_items_check = {}
         
         for index_1, check_index_1 in zip(test_grid, range(11)):
@@ -105,7 +106,7 @@ class TableWrapTest(unittest.TestCase):
         self.dict_grid_asserts(test_grid, full_items_check)
 
     def test_arg_min_max(self):
-        test_grid = grid.FloatGrid((0, 10), (-10, 5))
+        test_grid = grids.FloatGrid((0, 10), (-10, 5))
         for index1, index2 in test_grid.full_iter():
             test_grid[index1][index2] = abs(index1) + abs(index2)
 

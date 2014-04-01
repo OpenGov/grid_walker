@@ -2,28 +2,45 @@ import os
 import shutil
 from setuptools import setup
 
-# Utility function to read the README file.
 def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+    with open(fname) as fhandle:
+        return fhandle.read()
 
-# Cleanup builds so changes don't persist into setup
-build_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'build'))
-dist_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'dist'))
-if (os.path.isdir(build_dir)):
-    shutil.rmtree(build_dir)
-if (os.path.isdir(dist_dir)):
-    shutil.rmtree(dist_dir)
+def readMD(fname):
+    # Utility function to read the README file.
+    full_fname = os.path.join(os.path.dirname(__file__), fname)
+    if 'PANDOC_PATH' in os.environ:
+        import pandoc
+        pandoc.core.PANDOC_PATH = os.environ['PANDOC_PATH']
+        doc = pandoc.Document()
+        with open(full_fname) as fhandle:
+            doc.markdown = fhandle.read()
+        return doc.rst
+    else:
+        return read(fname)
+
+required = [req.strip() for req in read('requirements.txt').splitlines() if req.strip()]
 
 setup(
-    name = "PyDataGrid",
-    version = "1.0.0",
-    author = "Matthew Seal",
-    author_email = "mseal@opengov.com",
-    description = ("A multi-dimensional grid used for state space searching"),
-    install_requires=['pydatawrap==1.2.0', 'numpy'],
-    dependency_links = ['https://github.com/DelphiSolutions/python_data_wrap/tarball/v1.2.0#egg=pydatawrap-1.2.0'],
-    packages=['pydgrid'],
-    test_suite = 'tests',
-    zip_safe = False,
-    long_description=read('README.md'),
+    name='GridWalker',
+    version='1.0.0',
+    author='Matthew Seal',
+    author_email='mseal@opengov.com',
+    description='A multi-dimensional grid used for state space searching',
+    long_description=readMD('README.md'),
+    install_requires=required,
+    license='New BSD',
+    packages=['gridwalker'],
+    test_suite='tests',
+    zip_safe=False,
+    url='https://github.com/OpenGov/grid_walker',
+    download_url='https://github.com/OpenGov/grid_walker/tarball/v1.0.0',
+    keywords=['grids', 'data', 'iterator', 'multi-dimensional'],
+    classifiers=[
+        'Development Status :: 3 - Alpha',
+        'Topic :: Utilities',
+        'License :: OSI Approved :: BSD License',
+        'Natural Language :: English',
+        'Programming Language :: Python :: 2 :: Only'
+    ]
 )

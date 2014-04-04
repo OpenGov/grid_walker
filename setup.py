@@ -1,5 +1,4 @@
 import os
-import shutil
 from setuptools import setup
 
 def read(fname):
@@ -20,10 +19,10 @@ def readMD(fname):
         return read(fname)
 
 required = [req.strip() for req in read('requirements.txt').splitlines() if req.strip()]
-
+version = '1.0.0'
 setup(
     name='GridWalker',
-    version='1.0.0',
+    version=version,
     author='Matthew Seal',
     author_email='mseal@opengov.com',
     description='A multi-dimensional grid used for state space searching',
@@ -34,7 +33,7 @@ setup(
     test_suite='tests',
     zip_safe=False,
     url='https://github.com/OpenGov/grid_walker',
-    download_url='https://github.com/OpenGov/grid_walker/tarball/v1.0.0',
+    download_url='https://github.com/OpenGov/grid_walker/tarball/v' + version,
     keywords=['grids', 'data', 'iterator', 'multi-dimensional'],
     classifiers=[
         'Development Status :: 3 - Alpha',

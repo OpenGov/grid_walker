@@ -10,9 +10,9 @@ class Grid(collections.MutableMapping):
         '''
         Args:
             grid_type: Defines the numpy type associated with this grid.
-            dim_ranges defines the ranges of values in each dimension 
+            dim_ranges defines the ranges of values in each dimension
                 for an arbitrary number of dimensions. The type can be
-                a slice or a tuple representing the values of a slice 
+                a slice or a tuple representing the values of a slice
                 (i.e. (-10, 10, 2) starts from -10 and goes to 10 inclusive
                 with a step size of 2). Note that slices are normally not
                 inclusive.
@@ -72,7 +72,7 @@ class Grid(collections.MutableMapping):
             step = default_params.step
 
         # Check for violations
-        if (first == None or last == None or step == None or 
+        if (first == None or last == None or step == None or
             step < 1 or last < first):
             raise self._bad_dim_error(dim)
 
@@ -88,18 +88,18 @@ class Grid(collections.MutableMapping):
         '''
         restrictions = self.dim_restrictions[dimension]
         if isinstance(index, slice):
-            if ((index.start != None and 
-                 (index.start < restrictions.first or 
+            if ((index.start != None and
+                 (index.start < restrictions.first or
                   index.start > restrictions.last)) or
-                (index.stop != None and 
-                 (index.stop < restrictions.first or 
+                (index.stop != None and
+                 (index.stop < restrictions.first or
                   index.stop > restrictions.last)) or
                 (index.step and index.step % restrictions.step != 0) or
-                (index.start != None and index.stop != None and 
+                (index.start != None and index.stop != None and
                  index.step > index.stop - index.start)):
                 raise KeyError(index)
         else:
-            if (index < restrictions.first or 
+            if (index < restrictions.first or
                 index > restrictions.last):
                 raise KeyError(index)
 
@@ -124,7 +124,7 @@ class Grid(collections.MutableMapping):
         else:
             # Will raise an exception if we're out of bounds
             self._check_against_limits(index, dimension)
-            
+
         if isinstance(index, slice):
             # Get start index
             if index.start != None:
@@ -133,7 +133,7 @@ class Grid(collections.MutableMapping):
                 start = 0
             # Get stop index
             if index.stop != None:
-                stop = (index.stop + drange.step - drange.first) / drange.step 
+                stop = (index.stop + drange.step - drange.first) / drange.step
             else:
                 stop = self.dim_lengths[dimension]-1
             # Get step index
@@ -148,7 +148,7 @@ class Grid(collections.MutableMapping):
 
     def _get_single_depth(self, multi_index):
         '''
-        Helper method for determining how many single index entries 
+        Helper method for determining how many single index entries
         there are in a particular multi-index.
         '''
         single_depth = 0
@@ -164,11 +164,11 @@ class Grid(collections.MutableMapping):
         of dimensional requests and slicing. All of the following
         are legal request types:
 
-        single index: grid[0] => grid_type object 
+        single index: grid[0] => grid_type object
                                  (or SubGrid if not last dimension)
-        compound index: grid[0][1] => grid_type object 
+        compound index: grid[0][1] => grid_type object
                                       (or SubGrid if not last dimension)
-        multi-index: grid[0, 1] => grid_type object 
+        multi-index: grid[0, 1] => grid_type object
                                    (or SubGrid if not last dimension)
         slice: grid[0:1] => SubGrid
         slice with step: grid[0:10:2] => SubGrid
@@ -180,7 +180,7 @@ class Grid(collections.MutableMapping):
         rebuilt_index = self._convert_to_array_index(index)
         index_len = listwrap.non_str_len_no_throw(index)
         # SubGrid request
-        if (len(self.dim_ranges) - index_len > 1 or 
+        if (len(self.dim_ranges) - index_len > 1 or
             (index_len > 0 and isinstance(rebuilt_index[-1], slice)) or
             isinstance(rebuilt_index, slice)):
             # Multi-index request
@@ -190,21 +190,21 @@ class Grid(collections.MutableMapping):
                 if single_depth > 0:
                     resolved_dims = rebuilt_index[:single_depth]
                     # Cut the grid at the depth position
-                    return SubGrid(self.grid[resolved_dims], self.dim_ranges[single_depth:], 
-                                   self.dim_lengths[single_depth:], 
+                    return SubGrid(self.grid[resolved_dims], self.dim_ranges[single_depth:],
+                                   self.dim_lengths[single_depth:],
                                    self.dim_restrictions[single_depth:], index[single_depth:])
                 # First index in multi-index is a slice
                 else:
-                    return SubGrid(self.grid, self.dim_ranges, self.dim_lengths, 
+                    return SubGrid(self.grid, self.dim_ranges, self.dim_lengths,
                                    self.dim_restrictions, index)
             # Slice request
             elif isinstance(rebuilt_index, slice):
-                return SubGrid(self.grid, self.dim_ranges, self.dim_lengths, 
+                return SubGrid(self.grid, self.dim_ranges, self.dim_lengths,
                                self.dim_restrictions, [index])
             # Index request, but with remaining dimension restrictions
             # Thus still a SubGrid
             else:
-                return SubGrid(self.grid[rebuilt_index], self.dim_ranges[1:], self.dim_lengths[1:], 
+                return SubGrid(self.grid[rebuilt_index], self.dim_ranges[1:], self.dim_lengths[1:],
                                self.dim_restrictions[1:])
         # Specific index for all dimensions
         else:
@@ -232,8 +232,8 @@ class Grid(collections.MutableMapping):
 
     def _generate_dim_range(self, dim):
         '''
-        Generates a slice of the range for a particular dimension of 
-        the grid. Thus range(self._generate_dim_range()) produces the 
+        Generates a slice of the range for a particular dimension of
+        the grid. Thus range(self._generate_dim_range()) produces the
         keys over a particular range.
         '''
         restrict = self.dim_restrictions[dim]
@@ -244,7 +244,7 @@ class Grid(collections.MutableMapping):
 
     def _generate_mapped_grid_ranges(self):
         '''
-        Generates the slice ranges of all valid keys for the grid at 
+        Generates the slice ranges of all valid keys for the grid at
         each dimension level.
         '''
         mapped_grid_ranges = []
@@ -298,8 +298,8 @@ class Grid(collections.MutableMapping):
                     restrict_slice = grid._generate_dim_range(dim)
                     self.key_grid.append(restrict_slice)
                     # Build a linked list of cursors
-                    self.cursor = Link(restrict_slice.start, 
-                                       restrict_slice.start+restrict_slice.step, 
+                    self.cursor = Link(restrict_slice.start,
+                                       restrict_slice.start+restrict_slice.step,
                                        dim, prior_cursor, None)
                     self.cursor_links.append(self.cursor)
                     if prior_cursor != None:
@@ -317,22 +317,22 @@ class Grid(collections.MutableMapping):
                 # If our current cursor makes it to a None, we're done
                 if self.cursor == None:
                     raise StopIteration()
-                
+
                 # Set our cursor value
                 self.cursor.value = self.cursor.next_value
-                
+
                 # Get the slice for our current dimension
                 cursor_slice = self.key_grid[self.cursor.depth]
-                
+
                 # Grab our key if we're at the lowest level of the cursors
                 if self.cursor.next == None:
                     self.current_key = tuple(map(lambda c: c.value, self.cursor_links))
                 else:
                     self.current_key = None
-                    
+
                 # Update our value
                 self.cursor.next_value += cursor_slice.step
-                    
+
                 # Check if we've rotated through the whole dimension
                 if self.cursor.value >= cursor_slice.stop:
                     # Reset our dimension cursor and go back up the
@@ -344,10 +344,10 @@ class Grid(collections.MutableMapping):
                 elif self.cursor.next != None:
                     self.cursor = self.cursor.next
                     return self.next()
-                
+
                 # Return the fullkey, value tuple
                 return self.current_key
-            
+
         return GridIter(self)
 
     def full_iter_keys(self):
@@ -361,10 +361,10 @@ class Grid(collections.MutableMapping):
             def __init__(self, grid):
                 self.grid = grid
                 self.griditer = grid.full_iter_keys()
-                
+
             def __iter__(self):
                 return self
-            
+
             def next(self):
                 fullkey = self.griditer.next()
                 return self.grid[fullkey]
@@ -373,15 +373,15 @@ class Grid(collections.MutableMapping):
     def full_iter_items(self):
         '''
         Like full_iter, but return key, value pairs instead of just keys
-        ''' 
+        '''
         class GridItemIter(object):
             def __init__(self, grid):
                 self.grid = grid
                 self.griditer = grid.full_iter_keys()
-                
+
             def __iter__(self):
                 return self
-            
+
             def next(self):
                 fullkey = self.griditer.next()
                 return (fullkey, self.grid[fullkey])
@@ -424,8 +424,8 @@ class Grid(collections.MutableMapping):
         if len(self) <= 100:
             return repr(self)
         else:
-            mapitems = [(key, self[key]) for key in xrange(mapper.start, 
-                                                           mapper.start+(100*mapper.step), 
+            mapitems = [(key, self[key]) for key in xrange(mapper.start,
+                                                           mapper.start+(100*mapper.step),
                                                            mapper.step)]
             return str(mapitems)[:-1] + ", ... ]"
 
@@ -434,8 +434,8 @@ class Grid(collections.MutableMapping):
         This can be expensive for high dimension lists.
         '''
         mapper = self._generate_dim_range(0)
-        mapitems = [(key, self[key]) for key in xrange(mapper.start, 
-                                                       mapper.stop, 
+        mapitems = [(key, self[key]) for key in xrange(mapper.start,
+                                                       mapper.stop,
                                                        mapper.step)]
         return repr(mapitems)
 
@@ -461,7 +461,7 @@ class SubGrid(Grid):
 
     def _convert_restrictions(self, restrictions):
         '''
-        Helper method to convert all restrictions in the input 
+        Helper method to convert all restrictions in the input
         list into DimensionParam objects.
         '''
         converted = []
@@ -477,7 +477,7 @@ class SubGrid(Grid):
         for i in xrange(max(len(first_restrictions), len(second_restrictions))):
             first_param = first_restrictions[i] if i < len(first_restrictions) else None
             second_param = second_restrictions[i] if i < len(second_restrictions) else None
-                
+
             # Check all 4 cases
             if first_param == None and second_param != None:
                 combined_params.append(second_param)

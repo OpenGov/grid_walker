@@ -10,7 +10,7 @@ select, and multi-dimensional slicing.
 Accessing a grid follows the `__getitem__` convention of `[index]`. To retrieve
 a multi-dimensional selection either `[index1, index2]` or `[(index1, index2)]`
 may be used to specify the ordered dimensions of the grid to subselect. Any of
-the index requests can be replaced by a slice object such that 
+the index requests can be replaced by a slice object such that
 `[index1, start2:end2:step2]` is a legal request.
 
 Slices provide SubGrid objects which act as grids, but map their referenced data
@@ -30,11 +30,10 @@ of memory, even when using an efficient scheme. This extends to a very long
 iteration times as the number of elements to visit grows exponentially.
 Take a 5 dimensional grid with 10 values for each dimension. this makes a 10^5
 element grid -- which is 100k iterables -- and would take ~400kb of storage space.
-The same grid with 100 values for each dimension would hae 40 billion elements
+The same grid with 100 values for each dimension would have 40 billion elements
 and take more than 37GB of memory to store.
 
 ## Dependencies
-* allset
 * pydatawrap
 * numpy
 
